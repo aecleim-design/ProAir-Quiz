@@ -1,1 +1,0 @@
-Place BG‑ProAir Parts Blank.pdf in this folder (exact filename required).
