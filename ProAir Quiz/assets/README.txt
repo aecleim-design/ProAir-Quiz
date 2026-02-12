@@ -1,1 +1,0 @@
-Place BG-ProAir Parts Blank.pdf here. The app expects assets/BG-ProAir Parts Blank.pdf
