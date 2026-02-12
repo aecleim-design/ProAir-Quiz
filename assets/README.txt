@@ -1,1 +1,0 @@
-Place your PDF at assets/pdf/BG-ProAir Parts Blank.pdf (exact filename).
