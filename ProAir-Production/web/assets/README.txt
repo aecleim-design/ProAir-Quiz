@@ -1,1 +1,0 @@
-Place BG-ProAir Parts Blank.pdf here if you need to swap; current build expects this exact filename.
