@@ -1,0 +1,123 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>BG ProAir – Interactive Training Quiz (v10 – Tech Nouns + Synonymous Distractors)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+:root{--bg:#0f172a;--panel:#111827;--text:#e5e7eb;--muted:#94a3b8;--accent:#22c55e;--accent2:#60a5fa;--danger:#ef4444;--warn:#f59e0b}
+html,body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;padding:0}
+header{padding:18px 22px;background:linear-gradient(90deg,#0b132b,#1c2541);border-bottom:1px solid #1f2937}
+header h1{margin:0;font-size:1.45rem}
+header .subtext{margin-top:6px;color:var(--muted);max-width:900px}
+.wrap{max-width:1500px;margin:0 auto;padding:20px}
+.controls{background:var(--panel);border:1px solid #374151;border-radius:10px;padding:16px}
+.controls .row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.controls label{display:flex;align-items:center;gap:6px;padding:4px 8px;border:1px solid #334155;border-radius:8px;font-size:13px;color:var(--muted)}
+.controls input[type=checkbox]{transform:scale(1.2)}
+.controls input[type=number]{background:#0b1220;border:1px solid #334155;color:#e5e7eb;padding:5px 8px;border-radius:8px;width:80px;font-size:14px}
+.controls button{cursor:pointer;padding:8px 12px;background:#16355b;border:1px solid #2563eb;color:#e5e7eb;border-radius:8px;font-size:14px}
+.layout{margin-top:18px;display:grid;grid-template-columns:1.1fr 0.9fr;gap:18px}
+.card{background:var(--panel);border:1px solid #374151;border-radius:10px;padding:16px}
+.card.locked{opacity:0.35;pointer-events:none}
+.card.active{outline:2px solid var(--accent2);box-shadow:0 0 0 2px rgba(96,165,250,.25) inset}
+.q-meta{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.pill{display:inline-block;padding:2px 8px;border:1px solid #334155;border-radius:999px;font-size:12px;color:#cbd5e1}
+.pill.step{color:#94a3b8;border-color:#475569}
+.pill.timer{color:#bfdbfe;border-color:#2563eb;min-width:48px;text-align:center}
+.q-title{font-weight:600;margin-bottom:10px}
+.options{display:grid;gap:8px;margin-top:10px}
+.option{background:#0b1220;border:1px solid #334155;padding:10px 12px;border-radius:8px;text-align:left;cursor:pointer;color:#e5e7eb}
+.option:hover{border-color:#60a5fa}
+.option.correct{border-color:#22c55e;background:#0d1f18}
+.option.incorrect{border-color:#ef4444;background:#22060c}
+.option.chosen{border-color:#22c55e;box-shadow:0 0 0 2px rgba(34,197,94,.25) inset}
+#previewPane{background:var(--panel);border:1px solid #374151;border-radius:10px;padding:14px;position:sticky;top:12px;align-self:start;height:calc(100vh - 24px);display:flex;flex-direction:column}
+.previewHeader{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #334155}
+.previewBox{position:relative;flex:1;background:#0b1220;border:1px solid #334155;border-radius:8px;overflow:auto;display:flex;align-items:center;justify-content:center}
+.previewBox object{width:100%;height:100%;border:0}
+#highlightLayer{position:absolute;inset:0;pointer-events:none}
+.hl{position:absolute;transform:translate(-50%,-50%);background:#ef4444;color:white;border-radius:999px;border:2px solid #fff;min-width:28px;min-height:28px;display:flex;align-items:center;justify-content:center;font-weight:800;box-shadow:0 0 0 6px rgba(239,68,68,.25)}
+.hl::after{content:"";position:absolute;width:36px;height:36px;border:2px solid rgba(239,68,68,.5);border-radius:999px;animation:pulse 1.6s infinite ease-out}
+@keyframes pulse{0%{transform:scale(0.8)}70%{transform:scale(1.2);opacity:.2}100%{transform:scale(1.5);opacity:0}}
+.toolbar button{padding:6px 10px;border-radius:8px;border:1px solid #334155;background:#0b1220;color:#e5e7eb;cursor:pointer}
+.toolbar button:hover{border-color:#60a5fa}
+.toolbar .active{border-color:#22c55e;box-shadow:0 0 0 2px rgba(34,197,94,.25) inset}
+.score-box{margin-top:20px;background:var(--panel);border:1px solid #374151;border-radius:10px;padding:16px}
+.score{font-size:15px;font-weight:600}
+#breakdown{margin-top:8px;color:#94a3b8;font-size:14px}
+.answer{font-weight:600;color:#86efac}
+kbd{background:#0b1220;border:1px solid #334155;border-radius:6px;padding:1px 6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px}
+#startScreen{position:fixed;inset:0;background:linear-gradient(180deg,#0b132b 0%,#0f172a 100%);display:flex;align-items:center;justify-content:center;z-index:9999}
+#startCard{background:#111827;border:1px solid #374151;border-radius:14px;max-width:560px;width:92%;padding:28px;text-align:center}
+#startCard h2{margin:0 0 6px 0;font-size:1.4rem}
+#startCard p{margin:8px 0 18px 0;color:#cbd5e1}
+#startBtn{background:#22c55e;border:1px solid #16a34a;color:#052e16;padding:10px 16px;border-radius:10px;font-weight:700;cursor:pointer}
+#startBtn:hover{filter:brightness(1.05)}
+.small{font-size:12px;color:#94a3b8}
+</style>
+</head>
+<body>
+ <div id="startScreen" aria-modal="true" role="dialog">
+ <div id="startCard">
+ <h2>BG ProAir — Interactive Training Test</h2>
+ <p>Press <strong>Start Test</strong> to begin. Timers will start only after you click the button.</p>
+ <button id="startBtn">Start Test</button>
+ <div class="small" style="margin-top:10px">Default time/question: 30 seconds (instructor can change later).</div>
+ </div>
+ </div>
+ <header>
+ <div class="wrap">
+ <h1>BG ProAir – Interactive Training Quiz</h1>
+ <div class="subtext">Technical-noun blanking + more synonymous distractors; unlocked scroll; non‑sticky controls.</div>
+ </div>
+ </header>
+ <div class="wrap">
+ <div class="controls">
+ <div class="row">
+ <label><input type="checkbox" id="shuffleQuestions" checked /> Shuffle questions</label>
+ <label><input type="checkbox" id="limitTwenty" checked /> Limit to 20</label>
+ <label>Time/Q (sec) <input type="number" id="perQTime" value="30" min="5" max="600" step="5" /></label>
+ <button id="btnGenerate" class="primary">Generate New Version</button>
+ <button id="btnReset" class="warn">Clear Answers</button>
+ </div>
+ </div>
+ <div class="layout" id="layout">
+ <div>
+ <div id="quiz"></div>
+ <div class="score-box" style="margin-top:12px">
+ <div class="score" id="scoreLine">Score: 0 / 0</div>
+ <div id="breakdown"></div>
+ <details style="margin-top:10px">
+ <summary>Show answer key (current version)</summary>
+ <div id="answerKey" style="margin-top:8px"></div>
+ </details>
+ </div>
+ <p class="subtext" style="margin-top:12px">Keyboard: <kbd>1–4</kbd> to answer, <kbd>N</kbd> next, <kbd>P</kbd> previous.</p>
+ </div>
+ <aside id="previewPane">
+ <div class="previewHeader">
+ <div><strong>Diagram Preview</strong> <span class="pill" id="pageName"></span></div>
+ <div class="toolbar" style="display:flex; gap:8px; align-items:center;">
+ <button id="btnZoomIn">Zoom +</button>
+ <button id="btnZoomOut">Zoom −</button>
+ <button id="btnMark" title="Mark highlight location">Mark</button>
+ <button id="btnClearMark" title="Clear saved highlight">Clear Mark</button>
+ <a id="openPdf" href="#" target="_blank" class="pill" style="text-decoration:none">Open PDF</a>
+ </div>
+ </div>
+ <div class="previewBox" id="previewBox">
+ <div class="subtext">When a Parts question is active, the exact diagram page (fit to width) shows here.</div>
+ <div id="highlightLayer"></div>
+ </div>
+ <div class="subtext" style="margin-top:8px">Tip: The PDF is bundled under <em>assets/BG‑ProAir Parts Blank.pdf</em>.</div>
+ </aside>
+ </div>
+ </div>
+<script>
+const BLANK_PDF = 'assets/BG-ProAir Parts Blank.pdf';
+const PAGE_MAP = {"Refill Absorber":1,"Ice Cooler, Complete":2,"Breathing Connection":3,"Breathing Bag":4,"Cylinder Holder":5,"Shoulder Harness":8,"Minimum Valve":11,"Pressure Reducer":12,"Pneumatics":13,"FPS 7000 Mask":16};
+</script>
+</body>
+</html>
