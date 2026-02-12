@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>BG ProAir – Interactive Training Quiz (v10 – Tech Nouns + Synonymous Distractors)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+:root{--bg:#0f172a;--panel:#111827;--text:#e5e7eb;--muted:#94a3b8;--accent:#22c55e;--accent2:#60a5fa;--danger:#ef4444;--warn:#f59e0b}
+html,body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;padding:0}
+header{padding:18px 22px;background:linear-gradient(90deg,#0b132b,#1c2541);border-bottom:1px solid #1f2937}
+header h1{margin:0;font-size:1.45rem}
+header .subtext{margin-top:6px;color:var(--muted);max-width:900px}
+.wrap{max-width:1500px;margin:0 auto;padding:20px}
+.controls{background:var(--panel);border:1px solid #374151;border-radius:10px;padding:16px}
+.controls .row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.controls label{display:flex;align-items:center;gap:6px;padding:4px 8px;border:1px solid #334155;border-radius:8px;font-size:13px;color:var(--muted)}
+.controls input[type=checkbox]{transform:scale(1.2)}
+.controls input[type=number]{background:#0b1220;border:1px solid #334155;color:var(--text);padding:5px 8px;border-radius:8px;width:80px;font-size:14px}
+.controls button{cursor:pointer;padding:8px 12px;background:#16355b;border:1px solid #2563eb;color:var(--text);border-radius:8px;font-size:14px}
+.layout{margin-top:18px;display:grid;grid-template-columns:1.1fr 0.9fr;gap:18px}
+.card{background:var(--panel);border:1px solid #374151;border-radius:10px;padding:16px}
+.card.locked{opacity:0.35;pointer-events:none}
+.card.active{outline:2px solid var(--accent2);box-shadow:0 0 0 2px rgba(96,165,250,.25) inset}
+.q-meta{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.pill{display:inline-block;padding:2px 8px;border:1px solid #334155;border-radius:999px;font-size:12px;color:#cbd5e1}
+.pill.step{color:#94a3b8;border-color:#475569}
+.pill.timer{color:#bfdbfe;border-color:#2563eb;min-width:48px;text-align:center}
+.q-title{font-weight:600;margin-bottom:10px}
+.options{display:grid;gap:8px;margin-top:10px}
+.option{background:#0b1220;border:1px solid #334155;padding:10px 12px;border-radius:8px;text-align:left;cursor:pointer;color:var(--text)}
+.option:hover{border-color:#60a5fa}
+.option.correct{border-color:#22c55e;background:#0d1f18}
+.option.incorrect{border-color:#ef4444;background:#22060c}
+.option.chosen{border-color:#22c55e;box-shadow:0 0 0 2px rgba(34,197,94,.25) inset}
+#previewPane{background:var(--panel);border:1px solid #374151;border-radius:10px;padding:14px;position:sticky;top:12px;align-self:start;height:calc(100vh - 24px);display:flex;flex-direction:column}
+.previewHeader{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #334155}
+.previewBox{position:relative;flex:1;background:#0b1220;border:1px solid #334155;border-radius:8px;overflow:auto;display:flex;align-items:center;justify-content:center}
+.previewBox object{width:100%;height:100%;border:0}
+#highlightLayer{position:absolute;inset:0;pointer-events:none}
+.hl{position:absolute;transform:translate(-50%,-50%);background:#ef4444;color:white;border-radius:999px;border:2px solid #fff;min-width:28px;min-height:28px;display:flex;align-items:center;justify-content:center;font-weight:800;box-shadow:0 0 0 6px rgba(239,68,68,.25)}
+.hl::after{content:"";position:absolute;width:36px;height:36px;border:2px solid rgba(239,68,68,.5);border-radius:999px;animation:pulse 1.6s infinite ease-out}
+@keyframes pulse{0%{transform:scale(0.8)}70%{transform:scale(1.2);opacity:.2}100%{transform:scale(1.5);opacity:0}}
+.toolbar button{padding:6px 10px;border-radius:8px;border:1px solid #334155;background:#0b1220;color:#e5e7eb;cursor:pointer}
+.toolbar button:hover{border-color:#60a5fa}
+.toolbar .active{border-color:#22c55e;box-shadow:0 0 0 2px rgba(34,197,94,.25) inset}
+.score-box{margin-top:20px;background:var(--panel);border:1px solid #374151;border-radius:10px;padding:16px}
+.score{font-size:15px;font-weight:600}
+#breakdown{margin-top:8px;color:var(--muted);font-size:14px}
+.answer{font-weight:600;color:#86efac}
+kbd{background:#0b1220;border:1px solid #334155;border-radius:6px;padding:1px 6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px}
+#startScreen{position:fixed;inset:0;background:linear-gradient(180deg,#0b132b 0%,#0f172a 100%);display:flex;align-items:center;justify-content:center;z-index:9999}
+#startCard{background:#111827;border:1px solid #374151;border-radius:14px;max-width:560px;width:92%;padding:28px;text-align:center}
+#startCard h2{margin:0 0 6px 0;font-size:1.4rem}
+#startCard p{margin:8px 0 18px 0;color:#cbd5e1}
+#startBtn{background:#22c55e;border:1px solid #16a34a;color:#052e16;padding:10px 16px;border-radius:10px;font-weight:700;cursor:pointer}
+#startBtn:hover{filter:brightness(1.05)}
+.small{font-size:12px;color:#94a3b8}
+</style>
+</head>
+<body>
+  <div id="startScreen" aria-modal="true" role="dialog">
+    <div id="startCard">
+      <h2>BG ProAir — Interactive Training Test</h2>
+      <p>Press <strong>Start Test</strong> to begin. Timers will start only after you click the button.</p>
+      <button id="startBtn">Start Test</button>
+      <div class="small" style="margin-top:10px">Default time/question: 30 seconds (instructor can change later).</div>
+    </div>
+  </div>
+
+  <header>
+    <div class="wrap">
+      <h1>BG ProAir – Interactive Training Quiz</h1>
+      <div class="subtext">Technical-noun blanking + more synonymous distractors; unlocked scroll; non‑sticky controls.</div>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <div class="controls">
+      <div class="row">
+        <label><input type="checkbox" id="shuffleQuestions" checked /> Shuffle questions</label>
+        <label><input type="checkbox" id="limitTwenty" checked /> Limit to 20</label>
+        <label>Time/Q (sec) <input type="number" id="perQTime" value="30" min="5" max="600" step="5" /></label>
+        <button id="btnGenerate" class="primary">Generate New Version</button>
+        <button id="btnReset" class="warn">Clear Answers</button>
+      </div>
+    </div>
+
+    <div class="layout" id="layout">
+      <div>
+        <div id="quiz"></div>
+        <div class="score-box" style="margin-top:12px">
+          <div class="score" id="scoreLine">Score: 0 / 0</div>
+          <div id="breakdown"></div>
+          <details style="margin-top:10px">
+            <summary>Show answer key (current version)</summary>
+            <div id="answerKey" style="margin-top:8px"></div>
+          </details>
+        </div>
+        <p class="subtext" style="margin-top:12px">Keyboard: <kbd>1–4</kbd> to answer, <kbd>N</kbd> next, <kbd>P</kbd> previous.</p>
+      </div>
+
+      <aside id="previewPane">
+        <div class="previewHeader">
+          <div><strong>Diagram Preview</strong> <span class="pill" id="pageName"></span></div>
+          <div class="toolbar" style="display:flex; gap:8px; align-items:center;">
+            <button id="btnZoomIn">Zoom +</button>
+            <button id="btnZoomOut">Zoom −</button>
+            <button id="btnMark" title="Mark highlight location">Mark</button>
+            <button id="btnClearMark" title="Clear saved highlight">Clear Mark</button>
+            <a id="openPdf" href="#" target="_blank" class="pill" style="text-decoration:none">Open PDF</a>
+          </div>
+        </div>
+        <div class="previewBox" id="previewBox">
+          <div class="subtext">When a Parts question is active, the exact diagram page (fit to width) shows here.</div>
+          <div id="highlightLayer"></div>
+        </div>
+        <div class="subtext" style="margin-top:8px">Tip: Keep <em>BG‑ProAir Parts Blank.pdf</em> in the same folder as this HTML.</div>
+      </aside>
+    </div>
+  </div>
+
+<script>
+const BLANK_PDF = 'BG-ProAir Parts Blank.pdf';
+const PAGE_MAP = {"Refill Absorber":1,"Ice Cooler, Complete":2,"Breathing Connection":3,"Breathing Bag":4,"Cylinder Holder":5,"Shoulder Harness":8,"Minimum Valve":11,"Pressure Reducer":12,"Pneumatics":13,"FPS 7000 Mask":16};
+const STATEMENTS_FULL = [
+  "A positive pressure leak could be caused by a leakage in or at device components.",
+  "The batteries in the electronics assembly should be replaced as necessary.",
+  "Dow Corning 111 is to be used to lubricate O-rings.",
+  "The pressure relief valve is designed to open when the pressure within the breathing circuit is between +40 and +80 millimeters (+4 mbar and +8 mbar) of pressure measured on the water gage.",
+  "To prepare for testing adjust zero point of the RZ-25 tester.",
+  "Test adapter is used to connect the BG-ProAir apparatus to the RZ-25 tester.",
+  "A leaky exhalation or inhalation valve could be caused by a defective valve seat or valve disc.",
+  "During the exhalation valve test, if valve is operating properly, -10 mbar is indicated on the pressure gauge.",
+  "The EPDM breathing hoses use Bayonet Rings.",
+  "During testing of the inhalation valve, if valve is operating properly, +10 mbar is indicated on the pressure gauge.",
+  "During the positive pressure leak test, the pressure change within 1 minute must be lower than 1 mbar.",
+  "Only DRAGERSORB 400 is to be used to fill the refillable absorber.",
+  "The factory packed cartridge is good for 2.5 years from the manufacture date.",
+  "A positive pressure in the breathing circuit prevents ambient air from entering the system.",
+  "The BG-ProAir is approved with a factory/refillable absorber.",
+  "The Connect ECU monitoring system comprises a sensor unit, electronics assembly, and Connect ECU .",
+  "The drain valve should not open at less than 10 mbar or more than 25 mbar.",
+  "A fully filled oxygen cylinder holds 414 liters of medical oxygen.",
+  "The accuracy of the Connect ECU pressure measurement is +or- 150 psi of the final value at 3000 psi.",
+  "The accuracy of the Connect ECU pressure measurement is +0 or- 72 psi of the final value at 580 psi.",
+  "Never replace the battery in potentially explosive areas.",
+  "The weight of a fully charged BG-ProAir apparatus is 16.9kg (37.3 lbs.).",
+  "Check the supply of oxygen gas on the Connect ECU at intervals of approximately 15 minutes.",
+  "The minimum valve provides greater than 80 L/min flow.",
+  "The breathing bag has a 6-liter volume.",
+  "Insert speech diaphragm, install retainer ring and tighten with spanner.",
+  "The belt and harness must be dried prior to storage, to prevent growth of mold and fungus.",
+  "The pressure reducer, minimum valve, and oxygen hoses must be replaced every 10 years.",
+  "The Connect ECU pressure sensor converts pressure into digital signal.",
+  "The cylinder connector and cylinder valve must not be contaminated with oil or grease.",
+  "Two TX10 screws are used in the battery cover of the electronics assembly .",
+  "Rubber parts must be particularly protected from direct exposure to radiation.",
+  "Do not use any solvents, such as acetone, alcohol, benzene, white spirit, trichloroethylene, etc. for cleaning rubber and silicone parts.",
+  "The first low pressure warning occurs when the pressure drops to approximately 650 psi.",
+  "At the first low pressure warning approximately 75% of the oxygen has been used up.",
+  "The last low-pressure warning occurs when the pressure drops to approximately 150 psi.",
+  "During the low-pressure warning test, the alarm should activate at approximately 650 psi for a 4-hour apparatus.",
+  "At the last low-pressure warning approximately 95% of the oxygen has been used up.",
+  "To start the main alarm, press the Yellow panic button in center of the Connect ECU.",
+  "When the first low pressure warning occurs, the alarm sounds intermittently, the red LED flashes, and the screen of the Connect ECU turns red.",
+  "When the last low-pressure warning occurs, the alarm sounds intermittently without stopping and the red LED flashes constantly.",
+  "Medium pressure is delivered to the minimum valve.",
+  "The drain valve opens at between 10 and 25 mbar.",
+  "The BG-ProAir breathing circuit is designed with an air cooler that can be filled with ice packs or phase change material to reduce the temperature of the inhaled breath.",
+  "Remove the Tally Key to activate the motion sensor.",
+  "All parts which come in contact with the exhaled air must be thoroughly cleaned and disinfected after use.",
+  "Disinfect parts by immersing them in a disinfectant bath using an approved disinfectant.",
+  "Slide the minimum valve into the slot in the breathing bag.",
+  "All parts which have been disinfected should be rinsed thoroughly under running water.",
+  "CO2 absorber is not approved for use after indicated expiration date.",
+  "The maximum temperature of the air used to dry parts should not go above 60 degree C (140-degree F).",
+  "U.S. Department of Transportation requires hydro tests on composite cylinders every 5 years.",
+  "The O-ring under the speech diaphragm should be lubricated with Dow Corning 111.",
+  "The BG-ProAir is approved for use at temperatures above -6 degree C (21-degree F)",
+  "A defective pressure reducer should be replaced as needed.",
+  "Only oxygen (medical grade or better) with > 99.5% purity is to be used to fill the BG-ProAir oxygen cylinders.",
+  "Ice packs in the cooling system should only be used at ambient temperature above 0 degree C (32-degree F).",
+  "Pressurized oxygen in contact with oil, grease, or other contamination can result in fire or explosion.",
+  "It is safe to use the BG-ProAir for up to 4 hours with a yellow battery indicator with 1 bar.",
+  "The battery must be replaced if a red battery warning is indicated.",
+  "A defective bypass is the probable cause if the manual by-pass valve does not blow-off.",
+  "The blue LED pulses to indicate that the Connect ECU is operating normally.",
+  "Bypass output is > 80 L/min.",
+  "Relief valve activation is 4-8 bar or (58-116 psi).",
+  "The oxygen cylinder burst disc ruptures at 4,450 psi (307 bar).",
+  "Refillable absorber concerns are over packing and under packing.",
+  "The FPS 7000 masks allow 90% peripheral vision.",
+  "Polycarbonate or Plexiglas lenses can be used in the mask.",
+  "A minimum of 2175 psi is needed for a Connect ECU to perform a proper high pressure leak test.",
+  "The drain valve opens between 10 and 25 mbar and is therefore out of the RZ reading range.",
+  "To prepare the ice pack: Insert ice packs into freezing aid Freeze at least 24 hours @ -16 degree C (3-degree F) Remove from freezing aid Stack on top of each other",
+  "If the speech diaphragm is deformed or shows signs of damage, it must be replaced.",
+  "The BG-ProAir Connect ECU lights up when the button is briefly pressed.",
+  "Press then release the right-hand button to display temperature.",
+  "Do not re-use Factory absorbers.",
+  "When conducting component checks use a test pressure between +7 mbar and +7.5 mbar with a max pressure loss of 1 mbar/min.",
+  "The only battery approved for use with the Connect ECU is the Energizer L91."
+];
+
+const ASSEMBLIES = [
+  { title: "Refill Absorber", items: [{num:"1",name:"Refill Absorber Lid"},{num:"2",name:"Cooler/Absorber Lock"},{num:"3",name:"Retaining Washer"},{num:"4",name:"Cylinder Pin"},{num:"5",name:"Snap-Fit Cooler, Absorber"},{num:"6",name:"Sealing"},{num:"7",name:"Frame"},{num:"8",name:"Top Sieve"},{num:"9",name:"Filter Pads"},{num:"10",name:"Bottom Sieve"},{num:"11-13",name:"Refill Absorber Housing"},{num:"12",name:"Type Label"},{num:"13",name:"Absorber RFID"}]},
+  { title: "Ice Cooler, Complete", items: [{num:"1",name:"Snap-Fit"},{num:"2",name:"Ice Cooler Lid"},{num:"3",name:"Ice Cooler Cartridge"}]},
+  { title: "Breathing Connection", items: [{num:"1",name:"Valve Disc"},{num:"2",name:"Directional Valve Housing"},{num:"3",name:"Connector Piece"},{num:"4",name:"O-Ring"},{num:"5",name:"Bayonet Ring"},{num:"6",name:"Breathing Hose"},{num:"7",name:"Sealing Cap"},{num:"8",name:"Split Ring"}]},
+  { title: "Breathing Bag", items: [{num:"1",name:"Breathing Bag"},{num:"2",name:"Breathing Bag Lock"},{num:"3",name:"Relief Valve"},{num:"4",name:"Relief Valve Disc"},{num:"5",name:"Relief Valve Seal"},{num:"6",name:"Valve Disc"},{num:"7",name:"Spring"},{num:"8",name:"Valve Cap"},{num:"9",name:"Drain Valve"},{num:"10",name:"Drain Valve Cap"},{num:"11",name:"Connector Seal"}]},
+  { title: "Cylinder Holder", items: [{num:"1",name:"Cylinder Strap"},{num:"2",name:"Flat Head Screw"}]},
+  { title: "Shoulder Harness", items: [{num:"1",name:"Chest Strap"},{num:"2",name:"Webbing with Loop Head"},{num:"3",name:"Harness Anchor"},{num:"4",name:"Hose Loop (100 mm)"},{num:"5",name:"Hose Loop (210 mm)"},{num:"1-5",name:"Shoulder Harness, Comfort"}]},
+  { title: "Minimum Valve", items: [{num:"1",name:"Dust Cover"},{num:"2",name:"Valve Lever"},{num:"3",name:"Valve Lever Cover"},{num:"1-3",name:"Minimum Valve, Compl."}]},
+  { title: "Pressure Reducer", items: [{num:"4",name:"Pressure Reducer, CGA 540"},{num:"5",name:"PSP 5 Pressure Sensor"},{num:"6",name:"Screw"},{num:"7",name:"O-Ring"},{num:"8",name:"Clamp"},{num:"9",name:"Bracket"},{num:"10",name:"Sealing Ring"},{num:"11",name:"Angle Connection"},{num:"12",name:"Hand Wheel"},{num:"13",name:"O-Ring"},{num:"14",name:"Sinter Filter"}]},
+  { title: "Pneumatics", items: [{num:"2",name:"Pre-Flush"},{num:"3",name:"Bypass"}]},
+  { title: "FPS 7000 Mask", items: [{num:"1",name:"Mask Body FPS 7000"},{num:"2",name:"Upper Visor Frame"},{num:"3",name:"Visor"},{num:"4",name:"Lower Visor Frame"},{num:"7",name:"Clamp"},{num:"8",name:"Connector Piece"},{num:"9",name:"Cover"},{num:"11",name:"Turning Knob"},{num:"12",name:"Disc"},{num:"13",name:"Inner Mask"},{num:"14",name:"Button"},{num:"15A",name:"Head Strap"},{num:"15B",name:"Hairnet"},{num:"16",name:"Sliding Buckle"},{num:"17",name:"Double Button"},{num:"18",name:"Neck Strap"}]} 
+];
+</script>
+
+<script>
+const $ = s => document.querySelector(s); const $$ = s => [...document.querySelectorAll(s)];
+const QUIZ = { started:false, questions:[], answers:[], remaining:[], perQ:30, active:0, timerHandle:null, scrollLock:false, markMode:false, zoom:1 };
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]] } return a }
+function pickN(a,n){ return shuffle(a.slice()).slice(0,n) }
+function esc(s){ return (s||"").replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c])) }
+
+// Technical clusters and logic
+const TERM_CLUSTERS = [
+  {name:'pressure', terms:['pressure','pressure gauge','low pressure warning','positive pressure','medium pressure','pressure reducer','high pressure','pressure sensor','final pressure'], hints:['pressure','gauge','psi','mbar','bar']},
+  {name:'valves', terms:['valve','inhalation valve','exhalation valve','relief valve','drain valve','bypass valve','minimum valve','manual by-pass'], hints:['valve','by-pass','bypass']},
+  {name:'oxygen', terms:['oxygen','oxygen cylinder','medical oxygen','oxygen hose','oxygen purity','oxygen supply'], hints:['oxygen','cylinder']},
+  {name:'absorber', terms:['absorber','refillable absorber','factory absorber','CO2 absorber','DRAGERSORB 400','absorber RFID'], hints:['absorber','CO2','DRAGERSORB']},
+  {name:'cooler', terms:['air cooler','ice packs','ice cooler','cooling system','phase change material'], hints:['cooler','cooling','ice']},
+  {name:'connect_ecu', terms:['Connect ECU','electronics assembly','sensor unit','blue LED','red LED','yellow panic button','battery indicator','battery warning'], hints:['ECU','electronics','sensor','LED','battery','button']},
+  {name:'bag_mask', terms:['breathing bag','speech diaphragm','O-ring','FPS 7000 mask','visor','head strap','neck strap','hairnet','mask body','diaphragm'], hints:['bag','mask','diaphragm','O-ring','visor','strap','hairnet']},
+  {name:'pneumatics', terms:['pneumatics','pre-flush','bypass','angle connection','sealing ring','sinter filter','bracket','clamp','hand wheel'], hints:['filter','ring','connection','flush','clamp','wheel']},
+  {name:'regulatory', terms:['U.S. Department of Transportation','hydro tests','burst disc','composite cylinders'], hints:['DOT','hydro','burst','composite']},
+  {name:'units', terms:['mbar','bar','psi','L/min','degrees C','degrees F','temperature'], hints:['psi','mbar','bar','L/min','degree','temperature']}
+];
+const TERM_TO_CLUSTER = (()=>{ const map=new Map(); TERM_CLUSTERS.forEach(c=> c.terms.forEach(t=> map.set(t.toLowerCase(), c.name))); return map; })();
+function normalize(s){ return (s||'').toLowerCase(); }
+function findTechnicalPhrase(text){
+  const lower = text.toLowerCase(); let best=null;
+  const allTerms = Array.from(TERM_TO_CLUSTER.keys()).sort((a,b)=>b.length-a.length);
+  for(const t of allTerms){ const re=new RegExp('(^|[^a-z0-9-])'+t.replace(/[-/\^$*+?.()|[\]{}]/g,'\$&')+'([^a-z0-9-]|$)','i'); if(re.test(lower)){ best=t; break; } }
+  if(best) return best;
+  for(const c of TERM_CLUSTERS){ for(const h of c.hints){ const re=new RegExp('(^|[^a-z0-9-])'+h.replace(/[-/\^$*+?.()|[\]{}]/g,'\$&')+'([^a-z0-9-]|$)','i'); if(re.test(lower)){ for(const t of c.terms.sort((a,b)=>b.length-a.length)){ const r2=new RegExp('(^|[^a-z0-9-])'+t.replace(/[-/\^$*+?.()|[\]{}]/g,'\$&')+'([^a-z0-9-]|$)','i'); if(r2.test(lower)) return t.toLowerCase(); } return h.toLowerCase(); } } }
+  return null;
+}
+function getSynonymousDistractors(correct){
+  const lc=normalize(correct); const clusterName = TERM_TO_CLUSTER.get(lc) || ( ()=>{ const head=lc.split(/\s+/).pop(); for(const c of TERM_CLUSTERS){ if(c.hints.some(h=> lc.includes(h.toLowerCase()))) return c.name; if(c.terms.some(t=> t.toLowerCase().includes(head))) return c.name; } return null; })();
+  let pool=[]; if(clusterName){ const cluster=TERM_CLUSTERS.find(c=>c.name===clusterName); pool = cluster.terms.filter(t=>t.toLowerCase()!==lc);} 
+  if(pool.length<3){ const head=lc.split(/\s+/).pop(); TERM_CLUSTERS.forEach(c=> c.terms.forEach(t=>{ if(t.toLowerCase()!==lc && (t.toLowerCase().includes(head) || lc.includes(head))) pool.push(t); })); }
+  if(pool.length<3){ TERM_CLUSTERS.forEach(c=> c.terms.forEach(t=>{ if(t.toLowerCase()!==lc) pool.push(t); })); }
+  pool = Array.from(new Set(pool)); return shuffle(pool).slice(0,3);
+}
+function tokenizeMeaningful(text){ const cleaned=text.replace(/\([^)]*\)/g,' ').replace(/[^A-Za-z0-9\- ]/g,' '); return cleaned.split(/\s+/).filter(w=>w && w.length>2); }
+function blankTechnical(text){ let target=findTechnicalPhrase(text); if(!target){ const toks=tokenizeMeaningful(text); target=toks.length? toks[Math.floor(Math.random()*toks.length)] : null; } if(!target) return {stem:text, removed:""}; const re=new RegExp('(^|[^a-z0-9-])'+target.replace(/[-/\^$*+?.()|[\]{}]/g,'\$&')+'([^a-z0-9-]|$)','i'); const stem=text.replace(re, m=> m.replace(new RegExp(target,'i'), '____')); return {stem, removed:target}; }
+function buildRandomStatementQs(){ const chosen=pickN(STATEMENTS_FULL, Math.min(10, STATEMENTS_FULL.length)); return chosen.map((t,idx)=>{ const b=blankTechnical(t); const correct=(b.removed&&b.removed.trim())?b.removed:(tokenizeMeaningful(t)[0]||'component'); const distractors=getSynonymousDistractors(correct); return { type:'statement', key:`S${idx+1}`, title:'Statement of Fact', text:b.stem, answer:correct, options: shuffle([correct, ...distractors]) }; }); }
+function buildRandomPartsQs(){ const assys=pickN(ASSEMBLIES, Math.min(10, ASSEMBLIES.length)); return assys.map((assy,idx)=>{ const target=assy.items[Math.floor(Math.random()*assy.items.length)]; const pool=assy.items.map(i=>i.name); const options=shuffle([target.name, ...pickN(pool.filter(n=>n!==target.name),3)]); return { type:'parts', key:`P${idx+1}`, title: assy.title, assembly: assy.title, askNum: target.num, answer: target.name, options, page: PAGE_MAP[assy.title] }; }); }
+function renderQuiz(){ QUIZ.perQ=parseInt(document.getElementById('perQTime').value||"30",10); let qs=[...buildRandomStatementQs(), ...buildRandomPartsQs()]; if(document.getElementById('shuffleQuestions').checked) qs=shuffle(qs); if(document.getElementById('limitTwenty').checked && qs.length>20) qs=qs.slice(0,20); QUIZ.questions=qs; QUIZ.answers=Array(qs.length).fill(null); QUIZ.remaining=qs.map(()=>QUIZ.perQ); QUIZ.active=0; document.getElementById('quiz').innerHTML=''; document.getElementById('breakdown').textContent=''; document.getElementById('scoreLine').textContent=`Score: 0 / ${qs.length}`; document.getElementById('answerKey').innerHTML=qs.map((q,i)=>`Q${i+1}. <span class="answer">${esc(q.answer)}</span>`).join('<br>'); qs.forEach((q,idx)=>{ const card=document.createElement('div'); card.className='card locked'; card.dataset.index=idx; const meta=document.createElement('div'); meta.className='q-meta'; meta.innerHTML=`<span class="pill step">Q ${idx+1} / ${qs.length}</span> <span class="pill timer" id="t_${idx}"></span>`; card.appendChild(meta); const title=document.createElement('div'); title.className='q-title'; title.textContent = q.type==='statement'?`${q.title} — Fill the blank`:`${q.title} — Identify Part #${q.askNum}`; card.appendChild(title); const prompt=document.createElement('div'); prompt.innerHTML = q.type==='statement'?`<div>${esc(q.text)}</div>`:`<div>Select the correct name for part <strong>#${q.askNum}</strong>.</div>`; card.appendChild(prompt); const opts=document.createElement('div'); opts.className='options'; q.options.forEach(opt=>{ const btn=document.createElement('button'); btn.className='option'; btn.textContent=opt; btn.disabled=true; btn.addEventListener('click',()=>choose(idx,opt,btn)); opts.appendChild(btn); }); card.appendChild(opts); document.getElementById('quiz').appendChild(card); }); setActive(0,true); }
+function setActive(i,snap=true){ stopTimer(); QUIZ.active=i; document.querySelectorAll('.card').forEach(c=>{ c.classList.remove('active'); c.classList.add('locked'); c.querySelectorAll('.option').forEach(b=>b.disabled=true); }); const card=document.querySelector(`.card[data-index="${i}"]`); if(card){ card.classList.remove('locked'); card.classList.add('active'); card.querySelectorAll('.option').forEach(b=>b.disabled=false); } const q=QUIZ.questions[i]; if(q.type==='parts') showPreview(q); else clearPreview(); const pill=document.getElementById(`t_${i}`); if(pill) pill.textContent = QUIZ.remaining[i] + 's'; if(snap && card) card.scrollIntoView({behavior:'smooth',block:'start'}); if(!QUIZ.answers[i] && QUIZ.remaining[i]>0) startTimer(i); }
+function choose(qi,pick,btn){ if(QUIZ.answers[qi]) return; const q=QUIZ.questions[qi]; const card=document.querySelector(`.card[data-index="${qi}"]`); const all=card.querySelectorAll('.option'); all.forEach(b=>b.classList.remove('chosen')); btn.classList.add('chosen'); const correct=(pick===q.answer); if(correct) btn.classList.add('correct'); else { btn.classList.add('incorrect'); all.forEach(b=>{ if(b.textContent===q.answer) b.classList.add('correct'); }); } all.forEach(b=>b.disabled=true); QUIZ.answers[qi]={pick,correct}; QUIZ.remaining[qi]=0; stopTimer(); const score=QUIZ.answers.filter(a=>a&&a.correct).length; document.getElementById('scoreLine').textContent=`Score: ${score} / ${QUIZ.questions.length}`; const wrong=QUIZ.answers.map((a,i)=>({a,i})).filter(x=>x.a && !x.a.correct).map(x=>`Q${x.i+1} → Correct: <span class="answer">${esc(QUIZ.questions[x.i].answer)}</span>`); document.getElementById('breakdown').innerHTML=wrong.join('<br>'); setTimeout(moveNext,650); }
+function moveNext(){ for(let j=QUIZ.active+1;j<QUIZ.questions.length;j++){ if(!QUIZ.answers[j] && QUIZ.remaining[j]>0){ setActive(j,true); return; } } stopTimer(); }
+function startTimer(i){ QUIZ.timerHandle=setInterval(()=>{ if(QUIZ.remaining[i]<=0){ stopTimer(); autoReveal(i); return; } QUIZ.remaining[i]--; const pill=document.getElementById(`t_${i}`); if(pill) pill.textContent = QUIZ.remaining[i] + 's'; },1000); }
+function stopTimer(){ if(QUIZ.timerHandle){ clearInterval(QUIZ.timerHandle); QUIZ.timerHandle=null; } }
+function autoReveal(i){ const q=QUIZ.questions[i]; const card=document.querySelector(`.card[data-index="${i}"]`); const all=card.querySelectorAll('.option'); if(!QUIZ.answers[i]){ all.forEach(b=>{ if(b.textContent===q.answer) b.classList.add('correct'); b.disabled=true; }); QUIZ.answers[i]={pick:null,correct:false}; } moveNext(); }
+function keyFor(q){ return `${q.assembly}|${q.askNum}`; }
+function loadMark(key){ try{ return JSON.parse(localStorage.getItem('HL_'+key) || 'null'); }catch(_){ return null } }
+function saveMark(key,pt){ localStorage.setItem('HL_'+key, JSON.stringify(pt)); }
+function clearMark(key){ localStorage.removeItem('HL_'+key); }
+function showPreview(q){ const pn=document.getElementById('pageName'); pn.textContent = q.assembly + ' (Part #' + q.askNum + ')'; const url = `${BLANK_PDF}#page=${q.page}&zoom=page-width`; document.getElementById('previewBox').innerHTML = `<object id="pvObj" data="${url}" type="application/pdf"></object><div id="highlightLayer"></div>`; document.getElementById('openPdf').href=url; attachMarkingHandlers(q); const saved = loadMark(keyFor(q)); if(saved) placeHighlight(saved.x, saved.y, q.askNum); applyZoom(); }
+function clearPreview(){ document.getElementById('previewBox').innerHTML = `<div class="subtext">When a Parts question is active, the exact diagram page (fit to width) shows here.</div><div id="highlightLayer"></div>`; document.getElementById('pageName').textContent=''; }
+function placeHighlight(px, py, label){ const layer = document.getElementById('highlightLayer'); if(!layer) return; layer.innerHTML=''; const dot=document.createElement('div'); dot.className='hl'; dot.textContent=label; dot.style.left=px+'%'; dot.style.top=py+'%'; layer.appendChild(dot); }
+function attachMarkingHandlers(q){ const btnMark=document.getElementById('btnMark'); const btnClear=document.getElementById('btnClearMark'); if(btnMark){ btnMark.onclick=()=>{ QUIZ.markMode=!QUIZ.markMode; btnMark.classList.toggle('active',QUIZ.markMode); const layer=document.getElementById('highlightLayer'); if(layer) layer.style.pointerEvents = QUIZ.markMode?'auto':'none'; }; } if(btnClear){ btnClear.onclick=()=>{ clearMark(keyFor(q)); const layer=document.getElementById('highlightLayer'); if(layer) layer.innerHTML=''; }; } const layer=document.getElementById('highlightLayer'); if(layer){ layer.style.pointerEvents='none'; layer.addEventListener('click',(ev)=>{ if(!QUIZ.markMode) return; const rect=layer.getBoundingClientRect(); const x=((ev.clientX-rect.left)/rect.width)*100; const y=((ev.clientY-rect.top)/rect.height)*100; placeHighlight(x,y,q.askNum); saveMark(keyFor(q),{x,y}); }); } }
+function applyZoom(){ const z=QUIZ.zoom; const obj=document.getElementById('pvObj'); const layer=document.getElementById('highlightLayer'); if(obj){ obj.style.transform=`scale(${z})`; obj.style.transformOrigin='top left'; } if(layer){ layer.style.transform=`scale(${z})`; layer.style.transformOrigin='top left'; } }
+document.getElementById('btnZoomIn').addEventListener('click',()=>{ QUIZ.zoom=Math.min(QUIZ.zoom+0.1,2); applyZoom(); });
+document.getElementById('btnZoomOut').addEventListener('click',()=>{ QUIZ.zoom=Math.max(QUIZ.zoom-0.1,0.5); applyZoom(); });
+function showOverlay(){ const s=document.getElementById('startScreen'); if(s) s.style.display='flex'; QUIZ.started=false; stopTimer(); }
+function hideOverlay(){ const s=document.getElementById('startScreen'); if(s) s.style.display='none'; QUIZ.started=true; }
+document.getElementById('startBtn').addEventListener('click',()=>{ hideOverlay(); renderQuiz(); });
+document.getElementById('btnGenerate').addEventListener('click',()=>{ showOverlay(); });
+document.getElementById('btnReset').addEventListener('click',()=>{ showOverlay(); document.getElementById('quiz').innerHTML=''; document.getElementById('answerKey').innerHTML=''; document.getElementById('breakdown').textContent=''; document.getElementById('scoreLine').textContent='Score: 0 / 0'; clearPreview(); });
+</script>
+</body>
+</html>
