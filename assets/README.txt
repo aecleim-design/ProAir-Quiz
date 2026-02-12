@@ -1,1 +1,0 @@
-Place your real PDF at assets/pdf/BG-ProAir Parts Blank.pdf. The app expects this exact filename and path.
